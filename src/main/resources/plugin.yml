@@ -1,0 +1,16 @@
+name: JoinFailNotifier
+version: '1.0'
+main: com.koirdsuzu.joinfailnotifier.JoinFailNotifier
+api-version: '1.16'
+authors: [ koirdsuzu ]
+description: プレイヤーがサーバーに参加できなかった際にOPに通知するプラグイン
+website: https://github.com/koirdsuzu/
+commands:
+  joinfailnotifier:
+    description: プラグインのヘルプやリロードを行うコマンド
+    usage: /joinfailnotifier <reload/help>
+    permission: joinfailnotifier.use
+permissions:
+  joinfailnotifier.use:
+    description: /joinfailnotifier コマンドを使用できる権限
+    default: op
