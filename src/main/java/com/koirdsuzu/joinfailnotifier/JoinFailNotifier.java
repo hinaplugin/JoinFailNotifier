@@ -11,6 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Map;
+
 public class JoinFailNotifier extends JavaPlugin implements Listener {
     private FileConfiguration config;
 
@@ -31,7 +33,10 @@ public class JoinFailNotifier extends JavaPlugin implements Listener {
     public void onPlayerLogin(PlayerLoginEvent event) {
         if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
             String playerName = event.getPlayer().getName();
-            String reason = event.getResult().name();
+            String defaultReason = event.getResult().name();
+            Map<String, Object> reasonMappings = config.getConfigurationSection("kick_reasons").getValues(false);
+            String reason = reasonMappings.getOrDefault(defaultReason, defaultReason).toString();
+
             String message = ChatColor.translateAlternateColorCodes('&', config.getString("message_format", "&c[警告] &e{player} &cがサーバーに参加できませんでした: {reason}"))
                     .replace("{player}", playerName)
                     .replace("{reason}", reason);

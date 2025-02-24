@@ -1,6 +1,13 @@
 # メッセージのフォーマット（カラーコード対応）
 message_format: "&c[警告] &e{player} &cがサーバーに参加できませんでした: {reason}"
 
+# キック理由のカスタマイズ
+kick_reasons:
+  KICK_WHITELIST: "ホワイトリストに登録されていない"
+  KICK_BANNED: "BAN者"
+  KICK_FULL: "サーバーが満員"
+  KICK_OTHER: "不明な理由"
+
 # コマンド関連メッセージ
 messages:
   reload_success: "&a設定をリロードしました。"
