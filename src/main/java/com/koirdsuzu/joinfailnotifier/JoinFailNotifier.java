@@ -1,80 +1,42 @@
 package com.koirdsuzu.joinfailnotifier;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Map;
+import java.io.File;
 
-public class JoinFailNotifier extends JavaPlugin implements Listener {
-    private FileConfiguration config;
+public class JoinFailNotifier extends JavaPlugin {
+    public static JoinFailNotifier plugin;
+    public static FileConfiguration config;
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
-        config = getConfig();
-        getServer().getPluginManager().registerEvents(this, this);
-        getCommand("joinfailnotifier").setExecutor(new PluginCommand(this));
+        plugin = this;
+        this.loadConfiguration();
+        this.getServer().getPluginManager().registerEvents(new PlayerLoginListener(), this);
+        final PluginCommand command = this.getCommand("joinfailnotifier");
+        if (command != null){
+            command.setExecutor(new Commands());
+        }
     }
 
     @Override
     public void onDisable() {
-        saveConfig();
+        HandlerList.unregisterAll(this);
     }
 
-    @EventHandler
-    public void onPlayerLogin(PlayerLoginEvent event) {
-        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
-            String playerName = event.getPlayer().getName();
-            String defaultReason = event.getResult().name();
-            Map<String, Object> reasonMappings = config.getConfigurationSection("kick_reasons").getValues(false);
-            String reason = reasonMappings.getOrDefault(defaultReason, defaultReason).toString();
-
-            String message = ChatColor.translateAlternateColorCodes('&', config.getString("message_format", "&c[警告] &e{player} &cがサーバーに参加できませんでした: {reason}"))
-                    .replace("{player}", playerName)
-                    .replace("{reason}", reason);
-
-            notifyOps(message);
+    private void loadConfiguration(){
+        final File configFile = new File(this.getDataFolder(), "config.yml");
+        if (!configFile.exists()){
+            this.saveDefaultConfig();
         }
+        config = this.getConfig();
     }
 
-    private void notifyOps(String message) {
-        Bukkit.getOnlinePlayers().stream()
-                .filter(player -> player.isOp())
-                .forEach(player -> player.sendMessage(message));
-    }
-}
-
-class PluginCommand implements CommandExecutor {
-    private final JoinFailNotifier plugin;
-
-    public PluginCommand(JoinFailNotifier plugin) {
-        this.plugin = plugin;
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        FileConfiguration config = plugin.getConfig();
-
-        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', config.getString("messages.help_message", "&eUsage: /joinfailnotifier <reload/help>")));
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("reload")) {
-            plugin.reloadConfig();
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', config.getString("messages.reload_success", "&a設定をリロードしました。")));
-            return true;
-        }
-
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', config.getString("messages.invalid_command", "&c無効なコマンドです。/joinfailnotifier help を使用してください。")));
-        return true;
+    public void reload(){
+        this.reloadConfig();
+        config = this.getConfig();
     }
 }
