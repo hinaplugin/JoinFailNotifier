@@ -8,7 +8,7 @@ import org.bukkit.permissions.ServerOperator;
 
 import java.util.Locale;
 
-public class PlayerLoginListener implements Listener {
+public class PlayerLoginListener extends Config implements Listener {
 
     @EventHandler
     public void onPlayerLogin(PlayerLoginEvent event){
@@ -16,7 +16,7 @@ public class PlayerLoginListener implements Listener {
         if (result != PlayerLoginEvent.Result.ALLOWED){
             final String name = event.getPlayer().getName();
             final String reason = JoinFailNotifier.config.getString(result.name().toLowerCase(Locale.ROOT), result.name());
-            final String message = JoinFailNotifier.config.getString("kick_reasons", "&c[警告] &e{player} &cがサーバーに参加できませんでした: {reason}")
+            final String message = this.getReason()
                     .replace("{player}", name)
                     .replace("{reason}", reason);
             Bukkit.getOnlinePlayers().stream().filter(ServerOperator::isOp).forEach(player -> player.sendMessage(message));
